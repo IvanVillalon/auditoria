@@ -80,6 +80,12 @@ if(file_exists($archivo)){
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
 <script src="js_vendedor/vendedor.js?v=<?= time() ?>"></script>
+<script src="js_vendedor/helpers.js"></script>
+<script src="js_vendedor/ui.js"></script>
 
+<script src="js_vendedor/productos.js"></script>
+<script src="js_vendedor/devoluciones.js"></script>
+<script src="js_vendedor/inventario.js"></script>
+<script src="js_vendedor/registro_producto.js"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-<h1>Bienvenido Admin, <?= $_SESSION['usuario'].", Sucursal: ". $_SESSION['sucursal_nombre'];?></h1>
+<h1>Bienvenido, <?= $_SESSION['usuario'].", Sucursal: ". $_SESSION['sucursal_nombre'];?></h1>
 
 <nav>
     <a href="vendedor.php?secciones_vendedor=inventario">Inventario</a> |

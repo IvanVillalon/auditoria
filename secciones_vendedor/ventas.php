@@ -53,7 +53,7 @@ if (isset($_POST['vaciar'])) {
 
 <h2>Registrar Venta</h2>
 
-<form method="POST">
+<form method="POST" id="form_venta">
 
 <!-- ================= CLIENTE ================= -->
 <?php
@@ -86,7 +86,12 @@ Producto:
     <option value="">Selecciona producto</option>
 
     <?php foreach ($productos as $p) { ?>
-        <option value="<?= $p['id'] ?>">
+        <option 
+
+            value="<?= $p['id'] ?>"
+            data-precio="<?= $p['valor_unitario'] ?>"
+            data-color="<?= $p['color'] ?>"
+        >
             <?= $p['producto'] ?> - <?= $p['color'] ?>
             (Stock: <?= $p['stock'] ?>) - $<?= $p['valor_unitario'] ?>
         </option>
@@ -94,6 +99,8 @@ Producto:
 
 </select>
 
+<input type="hidden" id="color_oculto" name="color_oculto">
+<input type="hidden" id="precio_oculto" name="precio_oculto">
 <br><br>
 
 Cantidad:

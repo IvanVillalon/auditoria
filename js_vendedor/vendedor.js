@@ -19,37 +19,7 @@ function devolucionparcial(){
     procesarDevolucion("parcial");
 }
 
-function cargarDatosProducto() {
-    let selectProducto = document.getElementById("id_producto");
-    if (!selectProducto){
-        console.log("no existe selectProducto");
-        return;
-    }
-    let idProducto = selectProducto.value;
-    console.log("Producto seleccionado:", idProducto);
-    let codigo = selectProducto.options[selectProducto.selectedIndex].getAttribute("data-codigo");
-    document.getElementById("codigo_producto").value = codigo || "";
 
-    fetch("obtener_colores_actualizar.php?id_producto=" + idProducto)
-        .then(res => res.json())
-        .then(data => {
-            console.log("colores recibidos:", data);
-            let selectColor = document.getElementById("select_color");
-
-            selectColor.innerHTML = "<option value=''>Selecciona un color</option>";
-
-            data.forEach(item => {
-                selectColor.innerHTML += `
-                    <option value="${item.color}">
-                        ${item.color}
-                    </option>
-                `;
-            });
-        })
-        .catch(err => {
-            console.log("Error cargando colores:", err);
-        });
-}
 function procesarDevolucion(tipoForzado = null) {
 
     let productos = document.querySelectorAll("#tabla_detalle tbody tr[data-id]");
@@ -353,11 +323,12 @@ function filtrarTabla(){
         }
     }
 }
-
+/*
 function cargarColoresExistentes() {
     let producto = document.getElementById("producto_actualizar").value;
     console.log("Producto seleccionado:", producto);
-}
+}*/
+
 function mostraraccion() {
 
     const tipoSelect = document.getElementById("tipo_registro");
@@ -472,6 +443,7 @@ if (productoActualizar) {
     console.log("No se encontró el select de productos para actualizar");
 }
 });
+/*
 document.addEventListener("DOMContentLoaded", function() {
     let selectProducto = document.querySelector("select[name='buscarproducto']");
 
@@ -479,26 +451,34 @@ document.addEventListener("DOMContentLoaded", function() {
         console.log("no se encontro el select de productos");
         return;
     }
+function actualizarDatos() {
 
-    function actualizarDatos(){
-        let selected = selectProducto.options[selectProducto.selectedIndex];
+    let selected = selectProducto.options[selectProducto.selectedIndex];
 
-        console.log("option:", selected);
+    console.log("option:", selected);
 
-        let precio = selected.getAttribute("data-precio");
-        let color = selected.getAttribute("data-color");
+    let precio = selected.getAttribute("data-precio");
+    let color = selected.getAttribute("data-color");
 
-        document.getElementById("color_oculto").value = color || "";
-        document.getElementById("precio_oculto").value = precio || "";
+    const colorOculto = document.getElementById("color_oculto");
+    const precioOculto = document.getElementById("precio_oculto");
 
-        console.log("precio:", precio);
-        console.log("color:", color);
+    if (colorOculto) {
+        colorOculto.value = color || "";
     }
+
+    if (precioOculto) {
+        precioOculto.value = precio || "";
+    }
+
+    console.log("precio:", precio);
+    console.log("color:", color);
+}
 
     selectProducto.addEventListener("change", actualizarDatos);
 
     actualizarDatos();
-});
+});*/
 document.addEventListener("change", function(e) {
 
     if (e.target.matches(".check_producto")) {
@@ -519,132 +499,10 @@ document.addEventListener("change", function(e) {
     }
 
 });
-function guardarConteo(idToma){
 
-    let conteos = [];
 
-    document.querySelectorAll(".conteo").forEach(input => {
 
-        if(input.value !== ""){
-
-            conteos.push({
-                id_producto: input.dataset.producto,
-                color: input.dataset.color || null,
-                stock_sistema: input.dataset.stock,
-                stock_fisico: input.value
-            });
-
-        }
-
-    });
-
-    if(conteos.length === 0){
-        alert("Debes ingresar al menos un conteo");
-        return;
-    }
-
-    fetch("guardar_conteo.php",{
-        method:"POST",
-        headers:{
-            "Content-Type":"application/json"
-        },
-        body: JSON.stringify({
-            id_toma: idToma,
-            conteos: conteos
-        })
-    })
-    .then(async r => {
-        const text = await r.text();
-        console.log("RESPUESTA CRUDA:", text);
-
-        try{
-            return JSON.parse(text);
-        }catch(e){
-            throw new Error("JSON inválido");
-        }
-    })
-    .then(data=>{
-
-        alert(data.mensaje);
-
-        if(data.status === "success"){
-            location.reload();
-        }
-
-    })
-    .catch(err=>{
-        console.error(err);
-        alert("Error: " + err.message);
-    });
-
-}
-function procesarrespuestainventario(id_reporte) {
-
-    const accionEl = document.querySelector(`select.accion[data-id="${id_reporte}"]`);
-    const cantidadEl = document.querySelector(`input.cantidad[data-id="${id_reporte}"]`);
-    const respuestaEl = document.querySelector(`input.respuesta[data-id="${id_reporte}"]`);
-
-    const data = {
-        id_reporte,
-        accion: accionEl.value,
-        cantidad: cantidadEl.value,
-        respuesta: respuestaEl.value
-    };
-
-    fetch("procesar_respuesta_peticiones_auditor.php", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-    })
-    .then(async res => {
-        const texto = await res.text();
-
-        console.log("RESPUESTA CRUDA:", texto);
-
-        return JSON.parse(texto);
-    })
-    .then(resp => {
-        console.log("RESPUESTA PARSEADA:", resp);
-
-        alert(resp.mensaje);
-
-        if (resp.status === "ok") {
-            location.reload();
-        }
-    })
-    .catch(err => {
-        console.error("Error en la petición", err);
-        alert("Error en la petición");
-    });
-}
-document.querySelector("form").addEventListener("submit", function(e) {
-    e.preventDefault(); // 👈 evita recarga
-
-    let formData = new FormData(this);
-
-    fetch("api/registro_producto.php", {
-        method: "POST",
-        body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-
-        console.log(data);
-
-        if (data.status === "success") {
-            alert(data.mensaje);
-        } else {
-            alert("Error:" + data.mensaje);
-        }
-
-    })
-    .catch(error => {
-        console.error("Error:", error);
-    });
-});
+    
 console.log("Script de checkbox cargado");
 // Ejecutar al cargar la página Inicialización
 window.addEventListener('DOMContentLoaded', mostraraccion);
-src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"

@@ -26,7 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmtcredito->bind_param("s", $rut_cliente);
     $stmtcredito->execute();
     $rescredito = $stmtcredito->get_result()->fetch_assoc();
-    echo $rut_cliente;
+   
 
     // 🔥 GENERAR NÚMERO FACTURA
     $stmt = $conexion->prepare("SELECT numero_factura FROM ventas ORDER BY id DESC LIMIT 1");
@@ -105,9 +105,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // 🔥 INSERTAR VENTA
         $estado = "completa";
-        var_dump($rut_cliente);
-        echo "BD actual: " . $conexion->query("SELECT DATABASE()")->fetch_row()[0];
-        var_dump($_SESSION['cliente']);
+        
+        
+        
         $stmt = $conexion->prepare("
             INSERT INTO ventas (numero_factura, rut_cliente, id_vendedor, id_sucursal, estado, total) 
             VALUES (?, ?, ?, ?, ?, ?)
@@ -145,10 +145,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $conexion->commit();
 
         unset($_SESSION['carrito']);
-echo "<script>
+
+        /*echo "<script>
     alert('Venta registrada correctamente');
     window.location.href='boleta.php?id_venta=$id_venta';
-</script>";
+</script>";*/
+echo json_encode([
+    "success" => true,
+    "id_venta" => $id_venta
+]);
+exit;
 exit();
     } catch (Exception $e) {
         $conexion->rollback();

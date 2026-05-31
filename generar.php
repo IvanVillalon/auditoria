@@ -1,3 +1,3 @@
 <?php
-echo password_hash("auditor123456", PASSWORD_DEFAULT);
+echo password_hash("prueba123456", PASSWORD_DEFAULT);
 ?>

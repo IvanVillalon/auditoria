@@ -17,7 +17,7 @@ if ($token !== 'ERP2026') {
 
 require("../conexion.php");
 
-$sql = "SELECT * FROM productos";
+$sql = "SELECT * FROM producto";
 
 $resultado = mysqli_query($conexion, $sql);
 

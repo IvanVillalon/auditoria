@@ -6,12 +6,11 @@ class ProductoService {
 
         $repo = new NuevoProductoRepository();
 
-        $nombre = trim($data['nombre']);
-        $precio = (int)$data['precio'];
+        $nombre = trim($data['nombre'] ?? '');
+        $precio = (int)($data['precio'] ?? 0);
         $id_operario = $session['id'];
-        $categoria_medicion = trim($data['categoria_medicion']);
-        $categoria_producto = trim($data['categoria_producto']);
-
+        $categoria_medicion = trim($data['categoria_medicion'] ?? '');
+        $categoria_producto = trim($data['categoria_producto'] ?? '');
         if ($nombre === "" || $categoria_medicion === "" || $categoria_producto === "") {
             throw new Exception("Datos inválidos");
         }
