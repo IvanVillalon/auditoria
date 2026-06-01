@@ -1,4 +1,4 @@
-
+console.log("Registro producto JS cargado");
 const formProducto = document.getElementById("form_producto");
 
 if (formProducto) {
@@ -13,10 +13,15 @@ if (formProducto) {
             method: "POST",
             body: formData
         })
-        .then(res=>res.json())
+
+        /*.then(res=>res.json())*/
+        .then(res => res.text())
+.then(text => {
+    console.log("RESPUESTA:", text);
+})
         .then(data => {
 
-            console.log(data);
+            console.log("STATUS:", data.status);
 
             if (data.status === "success") {
                 alert(data.mensaje);

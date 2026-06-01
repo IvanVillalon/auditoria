@@ -25,7 +25,7 @@ class ProductoService {
             $conexion->commit();
 
             return [
-                "status" => "ok",
+                "status" => "success",
                 "mensaje" => "Producto creado correctamente"
             ];
 
