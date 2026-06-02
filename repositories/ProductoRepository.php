@@ -31,4 +31,25 @@ class ProductoRepository {
 
         return $stmt->get_result()->fetch_assoc();
     }
+    public function obtenerProductoPorId($conexion, $id) {
+
+    $stmt = $conexion->prepare("
+        SELECT
+            id,
+            producto,
+            valor_unitario,
+            categoria_producto,
+            categoria_medicion
+        FROM producto
+        WHERE id = ?
+    ");
+
+    $stmt->bind_param("i", $id);
+
+    $stmt->execute();
+
+    $resultado = $stmt->get_result();
+
+    return $resultado->fetch_assoc();
+}
 }

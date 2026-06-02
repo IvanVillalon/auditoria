@@ -8,5 +8,6 @@
     <a href="vendedor.php?secciones_vendedor=nota_credito">Nota de credito</a>|
     <a href="vendedor.php?secciones_vendedor=registro_clientes">Registro de clientes</a>|
     <a href="vendedor.php?secciones_vendedor=registro_productos">Registro Productos</a>|
+    <a href="vendedor.php?secciones_vendedor=actualizar_productos">Actualizar Productos</a>|
     <a href="logout.php">Cerrar sesión</a>
 </nav>

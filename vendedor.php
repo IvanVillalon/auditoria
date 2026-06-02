@@ -37,7 +37,8 @@ $seccionesPermitidas = [
     'inventario',
     'registro_productos',
     'registro_clientes',
-    'movimiento_stock'
+    'movimiento_stock',
+    'actualizar_productos'
 ];
 
 $seccion = $_GET['secciones_vendedor'] ?? 'inicio';
@@ -46,7 +47,12 @@ if(!in_array($seccion, $seccionesPermitidas)){
     $seccion = 'inicio';
 }
 
+
 $archivo = "secciones_vendedor/$seccion.php";
+if ($seccion === 'actualizar_productos') {
+    require_once 'controllers/ProductoController.php';
+    $productos = ProductoController::obtenerProductos($conexion);
+}
 ?>
 
 <!DOCTYPE html>
@@ -66,6 +72,7 @@ $archivo = "secciones_vendedor/$seccion.php";
 <div class="container mt-4">
 
 <?php
+
 if(file_exists($archivo)){
     include $archivo;
 }else{
@@ -82,7 +89,8 @@ if(file_exists($archivo)){
 <script src="js_vendedor/vendedor.js?v=<?= time() ?>"></script>
 <script src="js_vendedor/helpers.js"></script>
 <script src="js_vendedor/ui.js"></script>
-
+    
+<script src="js_vendedor/actualizar_producto.js"></script>
 <script src="js_vendedor/productos.js"></script>
 <script src="js_vendedor/devoluciones.js"></script>
 <script src="js_vendedor/inventario.js"></script>

@@ -103,11 +103,6 @@ function filtrarTabla(){
         }
     }
 }
-/*
-function cargarColoresExistentes() {
-    let producto = document.getElementById("producto_actualizar").value;
-    console.log("Producto seleccionado:", producto);
-}*/
 
 function mostraraccion() {
 
@@ -185,80 +180,6 @@ function toggleRequired() {
         inputsActualizar.forEach(el => el.disabled = false);
     }
 }
-document.addEventListener("DOMContentLoaded", function(){
-    toggleRequired();
-
-const productoActualizar = document.getElementById("producto_actualizar");
-
-if (productoActualizar) {
-    productoActualizar.addEventListener("change", function () {
-
-        let idProducto = this.value;
-
-        let contenedor = document.getElementById("contenedorcolores_actualizar");
-        let selectColor = document.getElementById("select_color_actualizar");
-
-        if (idProducto == "") {
-            contenedor.style.display = "none";
-            return;
-        }
-
-        fetch("obtener_colores_actualizar.php?id_producto=" + idProducto)
-            .then(res => res.json())
-            .then(data => {
-                selectColor.innerHTML = "<option value=''>Seleccione un color</option>";
-
-                data.forEach(color => {
-                    selectColor.innerHTML += `<option value="${color.color}">${color.color}</option>`;
-                });
-
-                selectColor.innerHTML += `<option value="nuevo">+ Agregar nuevo color</option>`;
-
-                contenedor.style.display = "block";
-            });
-
-    
-    } );
-} else {
-    console.log("No se encontró el select de productos para actualizar");
-}
-});
-/*
-document.addEventListener("DOMContentLoaded", function() {
-    let selectProducto = document.querySelector("select[name='buscarproducto']");
-
-    if (!selectProducto){
-        console.log("no se encontro el select de productos");
-        return;
-    }
-function actualizarDatos() {
-
-    let selected = selectProducto.options[selectProducto.selectedIndex];
-
-    console.log("option:", selected);
-
-    let precio = selected.getAttribute("data-precio");
-    let color = selected.getAttribute("data-color");
-
-    const colorOculto = document.getElementById("color_oculto");
-    const precioOculto = document.getElementById("precio_oculto");
-
-    if (colorOculto) {
-        colorOculto.value = color || "";
-    }
-
-    if (precioOculto) {
-        precioOculto.value = precio || "";
-    }
-
-    console.log("precio:", precio);
-    console.log("color:", color);
-}
-
-    selectProducto.addEventListener("change", actualizarDatos);
-
-    actualizarDatos();
-});*/
 document.addEventListener("change", function(e) {
 
     if (e.target.matches(".check_producto")) {
