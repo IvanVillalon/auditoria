@@ -36,6 +36,15 @@ class NotaCreditoController {
             ];
         }
     }
+    public static function index($conexion,$session,$get){ 
+        $service = new NotaCreditoService();
+        return $service->listarVentas(
+            $conexion,
+            $session,
+            $get
+        );  
+        
+    }
 }
 
 ?>

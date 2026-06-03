@@ -2,6 +2,35 @@
 
 class NotaCreditoRepository {
 
+
+
+    public static function getVentasPaginadas(
+        $conexion,
+        $sucursal,
+        $inicio,
+        $limite
+    ){
+        $stmt = $conexion->prepare("
+            SELECT
+                id,
+                numero_factura,
+                rut_cliente,
+                fecha,
+                total,
+                estado AS estado_venta
+            FROM ventas
+            WHERE id_sucursal = ?
+            ORDER BY id DESC
+            LIMIT ?, ?
+        ");
+        $stmt->bind_param("iii", $sucursal, $inicio, $limite);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+    public static function totalVentas($conexion){
+        $query = $conexion->prepare("SELECT COUNT(*) total FROM ventas");
+        return $query->fetch_assoc()['total'];
+    }
     public function getVentaDetalle($conexion, $id_venta) {
 
         $stmt = $conexion->prepare("

@@ -1,5 +1,7 @@
 <h2>Actualizar Producto</h2>
-
+<?php
+/** @var array $productos */
+?>
 <select name="id_producto" id="producto_actualizar">
 
     <option value="">Seleccione un producto</option>

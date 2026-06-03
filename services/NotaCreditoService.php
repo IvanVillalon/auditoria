@@ -101,4 +101,23 @@ class NotaCreditoService {
             "pdf" => "comprobante_nota_credito.php?id_nota=" . $id_nota
         ];
     }
+    public function listarVentas($conexion,$session,$get){ 
+        $limite = 10;
+        $pagina = isset($get['pagina'])
+            ? (int) $get['pagina']
+            : 1;
+            $inicio= ($pagina - 1) * $limite;
+            $facturas= NotaCreditoRepository::getVentasPaginadas(
+                $conexion,
+                $session['sucursal'],
+                $inicio,
+                $limite
+            );
+            $total= NotaCreditoRepository::totalVentas($conexion);
+            return [
+                'facturas' => $facturas,
+                'pagina' => $pagina,
+                'total_paginas' => ceil($total / $limite)
+            ];
+    }
 }

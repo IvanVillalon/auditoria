@@ -31,7 +31,7 @@ class ProductoRepository {
 
         return $stmt->get_result()->fetch_assoc();
     }
-    public function obtenerProductoPorId($conexion, $id) {
+    public static function obtenerProductoPorId($conexion, $id) {
 
     $stmt = $conexion->prepare("
         SELECT
@@ -51,5 +51,17 @@ class ProductoRepository {
     $resultado = $stmt->get_result();
 
     return $resultado->fetch_assoc();
+}
+public static function descontarStock($conexion, $producto_id, $cantidad, $sucursal)
+{
+    $stmt = $conexion->prepare("
+        UPDATE stock_sucursal
+        SET stock = stock - ?
+        WHERE id_producto = ?
+        AND id_sucursal = ?
+        ");
+
+    $stmt->bind_param("iii", $cantidad, $producto_id, $sucursal);
+    $stmt->execute();
 }
 }
