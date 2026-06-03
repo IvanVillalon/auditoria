@@ -1,7 +1,7 @@
 <?php
 
-require_once 'core/db.php';
-require_once 'core/auth.php';
+require_once __DIR__ . '/../core/db.php';
+require_once __DIR__ . '/../core/auth.php';
 
 require_once __DIR__ . '/../controllers/VentasController.php';
 require_once __DIR__ . '/../repositories/ClienteRepository.php';
@@ -33,13 +33,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (isset($_POST['finalizar'])) {
-        $ok = VentasController::finalizar($conexion, $_SESSION);
-
-        if ($ok) {
-            $_SESSION['carrito'] = [];
-            $mensaje = "✔ Venta realizada correctamente";
+        $resultado = VentasController::finalizar($conexion, $_SESSION);
+        if ($resultado['ok']){
+            $mensaje = "Venta finalizada con ID: " . $resultado['id_venta'];
         } else {
-            $mensaje = "❌ Error al finalizar venta";
+           $mensaje = "❌ " . ($resultado['mensaje'] ?? var_export($resultado, true));
         }
     }
 }
@@ -125,7 +123,7 @@ Cantidad:
     <?php foreach ($carrito as $i => $item) { ?>
 
         <?php
-            $producto = ProductoRepository::obtenerProductoporId($conexion, $item['producto']);
+            $producto = ProductoRepository::obtenerProductoPorId($conexion, $item['producto']);
             $subtotal = $item['cantidad'] * $item['precio'];
         ?>
 

@@ -38,16 +38,22 @@ class VentasController
         $session['carrito'] = CarritoService::vaciar();
     }
     public static function finalizar($conexion, &$session)
-    {
-        if (empty($session['carrito']) || empty($session['cliente'])) {
-            return false;
-        }
-        return VentaService::finalizarVenta(
+{
+    try {
+        $id_venta = VentaService::finalizarVenta(
             $conexion,
-            $_SESSION['carrito'],
-            $_SESSION['cliente'],
-            $_SESSION['sucursal'],
-            $id_vendedor = $_SESSION['id']
+            $session['carrito']  ?? [],
+            $session['cliente']  ?? '',
+            $session['sucursal'] ?? 0,
+            $session['id']       ?? 0
         );
+
+        $session['carrito'] = [];
+
+        return ['ok' => true, 'id_venta' => $id_venta, 'mensaje' => ''];
+
+    } catch (Exception $e) {
+        return ['ok' => false, 'id_venta' => null, 'mensaje' => $e->getMessage()];
     }
 }
+}  
