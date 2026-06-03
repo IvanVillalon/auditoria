@@ -6,7 +6,7 @@ class ProductoRepository {
         $stmt = $conexion->prepare("
             SELECT p.id, p.producto, p.valor_unitario, ss.stock, ss.color
             FROM producto p
-            INNER JOIN inventario ss ON p.id = ss.id_producto
+            INNER JOIN stock_sucursal ss ON p.id = ss.id_producto
             WHERE ss.id_sucursal = ?
         ");
 
@@ -21,7 +21,7 @@ class ProductoRepository {
         $stmt = $conexion->prepare("
             SELECT p.valor_unitario, ss.color
             FROM producto p
-            INNER JOIN inventario ss ON p.id = ss.id_producto
+            INNER JOIN stock_sucursal ss ON p.id = ss.id_producto
             WHERE p.id = ?
             LIMIT 1
         ");
