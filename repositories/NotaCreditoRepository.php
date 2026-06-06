@@ -1,8 +1,41 @@
 <?php
 
 class NotaCreditoRepository {
-
-
+    
+    public static function getNotasCredito($conexion, $sucursal){
+        $stmt = $conexion->prepare("
+        SELECT
+nc.id_nota_credito,
+nc.fecha,
+nc.estado,
+nc.comentario,
+dt.id_detalle_nota_credito,
+dt.id_nota_credito,
+dt.cantidad,
+dt.precio,
+dt.subtotal, 
+dt.color,
+p.id,
+p.producto,
+p.valor_unitario,
+p.codigo,
+v.id,
+v.numero_factura,
+v.rut_cliente,
+v.id_sucursal,
+v.id_vendedor,
+v.estado AS estado_venta,
+v.total AS total_venta
+FROM nota_credito nc
+INNER JOIN detalle_nota_credito dt ON nc.id_nota_credito = dt.id_nota_credito
+INNER JOIN producto p ON dt.id_producto = p.id
+INNER JOIN ventas v ON nc.id_venta = v.id
+WHERE v.id_sucursal = ? ");
+$stmt->bind_param("i", $sucursal);
+$stmt->execute();
+$resultadonotacredito = $stmt->get_result();
+        return $resultadonotacredito->fetch_all(MYSQLI_ASSOC);
+    }
 
     public static function getVentasPaginadas(
         $conexion,

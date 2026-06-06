@@ -214,41 +214,11 @@ for ($i = 1; $i <= $total_paginas; $i++) {
 
 echo "</div>";
 
-$querynotacredito = "
-SELECT
-nc.id_nota_credito,
-nc.fecha,
-nc.estado,
-nc.comentario,
-dt.id_detalle_nota_credito,
-dt.id_nota_credito,
-dt.cantidad,
-dt.precio,
-dt.subtotal, 
-dt.color,
-p.id,
-p.producto,
-p.valor_unitario,
-p.codigo,
-v.id,
-v.numero_factura,
-v.rut_cliente,
-v.id_sucursal,
-v.id_vendedor,
-v.estado AS estado_venta,
-v.total AS total_venta
-FROM nota_credito nc
-INNER JOIN detalle_nota_credito dt ON nc.id_nota_credito = dt.id_nota_credito
-INNER JOIN producto p ON dt.id_producto = p.id
-INNER JOIN ventas v ON nc.id_venta = v.id
-WHERE v.id_sucursal = ? ";
 
-$resultadonotacredito = $conexion->prepare($querynotacredito);
-$resultadonotacredito->bind_param("i", $_SESSION['sucursal']);
-$resultadonotacredito->execute();
-$resultadonotacredito = $resultadonotacredito->get_result();
+
+$resultadonotacredito = NotaCreditoRepository::getNotasCredito($conexion, $_SESSION['sucursal']);
 $notas_credito = [];
-while ($fila = $resultadonotacredito->fetch_assoc()) {
+foreach ($resultadonotacredito as $fila) {
     $notas_credito[] = $fila;
 }
 if (empty($notas_credito)) {
@@ -289,6 +259,7 @@ echo "<tr>
 echo "</table>";
 echo "</div>";
 }
+
 ?>
     
 <br><br>
