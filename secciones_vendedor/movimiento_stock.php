@@ -1,7 +1,8 @@
  <h2>Abastecimiento de sucursales</h2>
 <form action="api/abastecimientos_stock_sucursales.php" method="POST">
 <?php
-include "conexion.php";
+require_once __DIR__ . '/../core/db.php';
+require_once __DIR__ . '/../core/auth.php';
 $id_bodega_central = 1; // ID de la Bodega Central
 
 // Productos con stock en bodega central

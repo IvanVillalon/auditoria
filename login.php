@@ -1,7 +1,6 @@
 <?php
 session_start();
-require("conexion.php");
-
+require_once __DIR__ . '/core/db.php';
 /*require_once "services/historial_service.php";*/
 $error = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST") {

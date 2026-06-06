@@ -1,5 +1,5 @@
 <?php
-require 'conexion.php';
+require_once __DIR__ . '/core/db.php';
 /*require_once 'services/historial_service.php';*/
 
 session_start();

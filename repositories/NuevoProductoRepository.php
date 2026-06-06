@@ -58,6 +58,11 @@ class NuevoProductoRepository {
 
     
     }
+    public function obtenerProductoActualizar($conexion){
+        $stmt = $conexion->prepare("SELECT id, producto FROM producto ORDER BY producto ASC");
+        $stmt->execute();   
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }   
 
 }
 ?>

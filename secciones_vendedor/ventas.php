@@ -1,68 +1,70 @@
 <?php
 
-require_once 'core/db.php';
-require_once 'core/auth.php';
+require_once __DIR__ . '/../core/db.php';
+require_once __DIR__ . '/../core/auth.php';
 
-require_once 'services/VentaService.php';
-require_once 'repositories/ClienteRepository.php';
-require_once 'repositories/ProductoRepository.php';
-require_once 'repositories/VentasRepository.php';
-
-
+require_once __DIR__ . '/../controllers/VentasController.php';
+require_once __DIR__ . '/../repositories/ClienteRepository.php';
+require_once __DIR__ . '/../repositories/ProductoRepository.php';
+require_once __DIR__ . '/../services/CarritoService.php';
 
 if (!isset($_SESSION['carrito'])) {
     $_SESSION['carrito'] = [];
 }
+if (!empty($_POST['buscarcliente'])) {
+    $_SESSION['cliente'] = trim($_POST['buscarcliente']);
+}
 
 /* =========================
-   ACCIONES (SOLO ORQUESTA)
+   ACCIONES (SOLO CONTROLLER)
 ========================= */
 
-if (isset($_POST['agregar'])) {
 
-    $_SESSION['cliente'] = trim($_POST['buscarcliente']);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $producto  = $_POST['buscarproducto'];
-    $cantidad  = (int) $_POST['ingresarcantidad'];
+    if (isset($_POST['agregar'])) {
+        VentasController::agregarProducto($conexion, $_SESSION, $_POST);
+    }
 
-    // obtener datos del producto (ideal mover a service después)
-   $datosproducto = ProductoRepository::getProductoVenta($conexion, $producto);
+    if (isset($_POST['eliminar'])) {
+        VentasController::eliminar($_SESSION, $_POST);
+    }
 
-    $precio = $datosproducto['valor_unitario'] ?? 0;
-    $color  = $datosproducto['color'] ?? '';
+    if (isset($_POST['vaciar'])) {
+        VentasController::vaciar($_SESSION);
+    }
 
-    if ($producto && $cantidad > 0 && $precio > 0) {
-        VentaService::agregarProducto(
-            $_SESSION['carrito'],
-            $producto,
-            $cantidad,
-            $precio,
-            $color
-        );
+    if (isset($_POST['finalizar'])) {
+        
+        $resultado = VentasController::finalizar($conexion, $_SESSION);
+        if ($resultado['ok']){
+            $_SESSION['mensaje'] = "Venta finalizada con ID: " . $resultado['id_venta'];//Guararmos el mensaje en sesion par no perderlo al recargar
+        } else {
+           $_SESSION['mensaje'] = "❌ " . ($resultado['mensaje'] ?? var_export($resultado, true));
+        }
     }
 }
 
-if (isset($_POST['eliminar'])) {
-    VentaService::eliminarProducto($_SESSION['carrito'], $_POST['eliminar']);
-}
+$carrito = $_SESSION['carrito'];
 
-if (isset($_POST['vaciar'])) {
-    $_SESSION['carrito'] = VentaService::vaciarCarrito();
-}
 ?>
 
 <h2>Registrar Venta</h2>
 
-<form method="POST" id="form_venta">
+<?php if (!empty($mensaje)) { ?>
+    <p><?= $mensaje ?></p>
+<?php } ?>
+
+<hr>
 
 <!-- ================= CLIENTE ================= -->
-<?php
-$clientes = ClienteRepository::getAll($conexion);
-?>
+<?php $clientes = ClienteRepository::getAll($conexion); ?>
+
+<form method="POST">
 
 Cliente:
 <select name="buscarcliente" required>
-    <option value="">Selecciona un cliente</option>
+    <option value="">Selecciona cliente</option>
 
     <?php foreach ($clientes as $c) { ?>
         <option value="<?= $c['rut'] ?>"
@@ -73,25 +75,18 @@ Cliente:
     <?php } ?>
 
 </select>
+
 <br><br>
 
 <!-- ================= PRODUCTO ================= -->
-<?php
-$productos = ProductoRepository::getBySucursal($conexion,$_SESSION['sucursal']);
-
-?>
+<?php $productos = ProductoRepository::getBySucursal($conexion, $_SESSION['sucursal']); ?>
 
 Producto:
 <select name="buscarproducto" required>
     <option value="">Selecciona producto</option>
 
     <?php foreach ($productos as $p) { ?>
-        <option 
-
-            value="<?= $p['id'] ?>"
-            data-precio="<?= $p['valor_unitario'] ?>"
-            data-color="<?= $p['color'] ?>"
-        >
+        <option value="<?= $p['id'] ?>">
             <?= $p['producto'] ?> - <?= $p['color'] ?>
             (Stock: <?= $p['stock'] ?>) - $<?= $p['valor_unitario'] ?>
         </option>
@@ -99,8 +94,6 @@ Producto:
 
 </select>
 
-<input type="hidden" id="color_oculto" name="color_oculto">
-<input type="hidden" id="precio_oculto" name="precio_oculto">
 <br><br>
 
 Cantidad:
@@ -116,14 +109,11 @@ Cantidad:
 
 <h3>🛒 Carrito</h3>
 
-<?php
-$carrito = $_SESSION['carrito'];
-$total = VentaService::calcularTotal($carrito);
-?>
+<?php $total = CarritoService::total($carrito); ?>
 
 <?php if (!empty($carrito)) { ?>
 
-<table bordered="1" cellpadding="5">
+<table border="1" cellpadding="5">
     <tr>
         <th>Producto</th>
         <th>Cantidad</th>
@@ -133,30 +123,26 @@ $total = VentaService::calcularTotal($carrito);
         <th>Acción</th>
     </tr>
 
-    <?php foreach ($carrito as $i => $item) { 
+    <?php foreach ($carrito as $i => $item) { ?>
 
-        // nombre producto
-        $stmt = $conexion->prepare("SELECT producto FROM producto WHERE id = ?");
-        $stmt->bind_param("i", $item['producto']);
-        $stmt->execute();
-        $nombre = $stmt->get_result()->fetch_assoc()['producto'] ?? 'N/A';
+        <?php
+            $producto = ProductoRepository::obtenerProductoPorId($conexion, $item['producto']);
+            $subtotal = $item['cantidad'] * $item['precio'];
+        ?>
 
-        $subtotal = $item['cantidad'] * $item['precio'];
-    ?>
-
-    <tr>
-        <td><?= $nombre ?></td>
-        <td><?= $item['cantidad'] ?></td>
-        <td>$<?= $item['precio'] ?></td>
-        <td>$<?= $subtotal ?></td>
-        <td><?= $item['color'] ?></td>
-        <td>
-            <form method="POST">
-                <input type="hidden" name="eliminar" value="<?= $i ?>">
-                <button type="submit">❌</button>
-            </form>
-        </td>
-    </tr>
+        <tr>
+            <td><?= $producto['producto'] ?></td>
+            <td><?= $item['cantidad'] ?></td>
+            <td>$<?= $item['precio'] ?></td>
+            <td>$<?= $subtotal ?></td>
+            <td><?= $item['color'] ?></td>
+            <td>
+                <form method="POST">
+                    <input type="hidden" name="eliminar" value="<?= $i ?>">
+                    <button type="submit">❌</button>
+                </form>
+            </td>
+        </tr>
 
     <?php } ?>
 
@@ -164,16 +150,21 @@ $total = VentaService::calcularTotal($carrito);
 
 <h4>Total: $<?= number_format($total, 0, ',', '.') ?></h4>
 
-<!-- VACÍAR -->
+<!-- ================= ACCIONES ================= -->
+
 <form method="POST" onsubmit="return confirm('¿Vaciar carrito?')">
     <button type="submit" name="vaciar">🧹 Vaciar carrito</button>
 </form>
 
-<!-- FINALIZAR -->
-<form action="registroventas.php" method="POST">
-    <button type="submit">💰 Finalizar Venta</button>
+<br>
+
+<form method="POST" onsubmit="return confirm('¿Finalizar venta?')">
+    <input type="hidden" name="finalizar" value="1">
+    <button type="submit" name="finalizar">💰 Finalizar Venta</button>
 </form>
 
 <?php } else { ?>
-    <p>El carrito está vacío</p>
+
+<p>El carrito está vacío</p>
+
 <?php } ?>

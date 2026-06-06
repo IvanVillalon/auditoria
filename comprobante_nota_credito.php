@@ -2,7 +2,7 @@
 ob_start();
 session_start();
 require_once __DIR__ . '/fpdf/fpdf.php';
-require 'conexion.php';
+require_once __DIR__ . '/core/db.php';
 
 $id_nota_credito = $_GET['id_nota'] ?? 0;
 

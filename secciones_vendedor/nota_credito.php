@@ -1,3 +1,9 @@
+<?php
+require_once __DIR__ . '/../repositories/NotaCreditoRepository.php';
+require_once __DIR__ . '/../services/NotaCreditoService.php';
+require_once __DIR__ . '/../repositories/VentasRepository.php';
+?>
+
 <form onsubmit="return false;">
     <div class="titulo" style="display:flex; justify-content:center; align-items:center; flex-direction:column;">
         <h2>Registrar Nota de Crédito</h2>
@@ -17,7 +23,7 @@ style="max-width:400px; margin-top:15px;">
 $limite = 10;
 $pagina = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
 $inicio = ($pagina - 1) * $limite;
-
+/*
 //  TRAER SOLO FACTURAS PAGINADAS
 $stmt = $conexion->prepare("
 SELECT id, numero_factura, rut_cliente,fecha, total, estado AS estado_venta
@@ -27,15 +33,18 @@ ORDER BY id DESC
 LIMIT ?, ?
 ");
 $stmt->bind_param("iii",$_SESSION['sucursal'], $inicio, $limite);
-$stmt->execute();
-$resFacturas = $stmt->get_result();
+$stmt->execute();*/
+$resFacturas = NotaCreditoRepository::getVentasPaginadas(
+    $conexion,
+    $_SESSION['sucursal'],
+    $inicio,
+    $limite
+);
 
-$facturas = [];
+$facturas = $resFacturas;
 $idsVentas = [];
-
-while ($fila = $resFacturas->fetch_assoc()) {
-    $facturas[] = $fila;
-    $idsVentas[] = $fila['id'];
+foreach ($facturas as $venta) {
+    $idsVentas[] = $venta['id'];
 }
 
 // 🔹 SI NO HAY FACTURAS
@@ -45,45 +54,15 @@ if (empty($idsVentas)) {
 }
 
 // 🔹 2. TRAER DETALLE SOLO DE ESAS FACTURAS
-$ids = implode(",", $idsVentas);
+$ventas = VentasRepository::getDetalleVentasPorIds($conexion, $idsVentas);
 
-$queryDetalle = "
-SELECT
-    p.id,
-    p.numero_factura,
-    pr.producto,
-    p.fecha,
-    s.id_producto,
-    s.color,
-    s.cantidad AS cantidad_vendida,
-    IFNULL(dev.devuelto, 0) AS cantidad_devuelta,
-    (s.cantidad - IFNULL(dev.devuelto, 0)) AS cantidad_disponible,
-    s.precio
-FROM ventas p
-INNER JOIN detalle_venta s ON p.id = s.id_venta
-INNER JOIN producto pr ON s.id_producto = pr.id
-
-LEFT JOIN (
-    SELECT 
-        dnc.id_producto,
-        nc.id_venta,
-        SUM(dnc.cantidad) AS devuelto
-    FROM detalle_nota_credito dnc
-    INNER JOIN nota_credito nc 
-        ON dnc.id_nota_credito = nc.id_nota_credito
-    GROUP BY dnc.id_producto, nc.id_venta
-) dev 
-ON dev.id_producto = s.id_producto 
-AND dev.id_venta = p.id
-
-WHERE p.id IN ($ids)
-";
-
-$resultado = $conexion->query($queryDetalle);
-
-$ventas = [];
-while ($fila = $resultado->fetch_assoc()) {
-    $ventas[] = $fila;
+foreach ($ventas as $venta) {
+    if (!isset($venta['cantidad_devuelta'])) {
+        $venta['cantidad_devuelta'] = 0;
+    }
+    if (!isset($venta['cantidad_disponible'])) {
+        $venta['cantidad_disponible'] = $venta['cantidad_vendida'];
+    }
 }
 
 // 🔹 3. TOTAL DE PÁGINAS
@@ -160,7 +139,7 @@ foreach ($ventas as $venta) {
     $disabled = ($disponible <= 0) ? "disabled" : "";
     $color = ($disponible <= 0) ? "style='background:#ffcccc'" : "";
     
-  echo "<tr class='detalle '
+  echo "<tr class='detalle'
     data-factura='".$venta["numero_factura"]."' 
     data-id='".$venta["id_producto"]."' 
     data-color='".$venta["color"]."'
