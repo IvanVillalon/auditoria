@@ -29,6 +29,7 @@ class NotaCreditoRepository {
     }
     public static function totalVentas($conexion){
         $query = $conexion->prepare("SELECT COUNT(*) total FROM ventas");
+        $query->execute();
         return $query->fetch_assoc()['total'];
     }
     public function getVentaDetalle($conexion, $id_venta) {

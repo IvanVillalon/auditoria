@@ -54,8 +54,7 @@ if (empty($idsVentas)) {
 }
 
 // 🔹 2. TRAER DETALLE SOLO DE ESAS FACTURAS
-$id_venta = implode(",", $idsVentas);
-$ventas = VentasRepository::getdetalleVentas($conexion, $id_venta);
+$ventas = VentasRepository::getDetalleVentasPorIds($conexion, $idsVentas);
 
 foreach ($ventas as $venta) {
     if (!isset($venta['cantidad_devuelta'])) {
@@ -140,7 +139,7 @@ foreach ($ventas as $venta) {
     $disabled = ($disponible <= 0) ? "disabled" : "";
     $color = ($disponible <= 0) ? "style='background:#ffcccc'" : "";
     
-  echo "<tr class='detalle '
+  echo "<tr class='detalle'
     data-factura='".$venta["numero_factura"]."' 
     data-id='".$venta["id_producto"]."' 
     data-color='".$venta["color"]."'

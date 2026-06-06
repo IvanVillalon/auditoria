@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/../services/VentaService.php';
 require_once __DIR__ . '/../repositories/ProductoRepository.php';
+require_once __DIR__ . '/../repositories/VentasRepository.php';
 require_once __DIR__ . '/../services/CarritoService.php';
 class VentasController
 {
@@ -12,8 +13,20 @@ class VentasController
         $cantidad = (int) $post['ingresarcantidad'];
 
         $datos = ProductoRepository::getProductoVenta($conexion, $producto);
-
-        if ($datos && $cantidad > 0) {
+        if (!$datos || $cantidad <= 0){
+            return ['ok' => false, 'mensaje' => 'Producto no encontrado o cantidad inválida'];
+        }
+        //validamos stock   
+        $repo = new VentasRepository();
+        $stock = $repo->getStockDisponible(
+            $conexion,
+            $producto,
+            $session['sucursal'],
+            $datos['color']
+        );
+        if ($cantidad > $stock) {
+            return ['ok' => false, 'mensaje' => "Stock insuficiente. Disponible: $stock"];
+        }
 
             VentaService::agregarProducto(
                 $session['carrito'],
@@ -22,7 +35,8 @@ class VentasController
                 $datos['valor_unitario'],
                 $datos['color']
             );
-        }
+            return ['ok' => true, 'mensaje' => 'Producto agregado al carrito'];
+        
     }
 
     public static function eliminar(&$session, $post)

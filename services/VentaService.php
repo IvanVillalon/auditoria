@@ -54,8 +54,9 @@ class VentaService {
 
         $conexion->begin_transaction();
 
+        
         try {
-
+           
             // 1. crear venta
             $total = self::calcularTotal($carrito);
             $numero_factura = self::generarNumeroFactura($conexion);
@@ -70,8 +71,9 @@ class VentaService {
                     $item['producto'],
                     $item['cantidad'],
                     $item['precio'],
+                    $item['color'],
                     $subtotal,
-                    $item['color']
+                    $credito_usado = 0
                 );
 
                 // 3. descontar stock

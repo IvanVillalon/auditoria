@@ -1,8 +1,9 @@
 <?php
 require 'core/db.php';
 require 'core/auth.php';
+require 'controllers/VentasController.php';
 
-
+$carrito = $_SESSION['carrito'] ?? [];
 
 if (!isset($_SESSION['usuario']) || $_SESSION['rol'] != 'vendedor') {
     session_destroy();
@@ -53,6 +54,15 @@ if ($seccion === 'actualizar_productos') {
     require_once 'controllers/ProductoController.php';
     $productos = ProductoController::obtenerProductos($conexion);
 }
+if (isset($_POST['finalizar'])){
+    $resultado = VentasController::finalizar($conexion, $_SESSION);
+    if ($resultado['ok']){
+        $_SESSION['mensaje']= ['tipo'=>'ok', 'texto'=> "Venta finalizada con ID: " . $resultado['id_venta']];//Guararmos el mensaje en sesion par no perderlo al recargar
+    }else
+    {
+        $_SESSION['mensaje'] = ['tipo'=>'error', 'texto'=> "❌ " . ($resultado['mensaje'] ?? var_export($resultado, true))];
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -77,7 +87,7 @@ if(file_exists($archivo)){
     include $archivo;
 }else{
     echo "<div class='alert alert-warning'>
-            La sección no existe
+        <h4 class='alert-heading'>Elige una sección</h4>
           </div>";
 }
 ?>

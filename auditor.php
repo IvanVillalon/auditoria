@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'conexion.php';
+require 'core/db.php';
 
 if (!isset($_SESSION['usuario']) || $_SESSION['rol'] != 'auditor') {
     header("Location: login.php");

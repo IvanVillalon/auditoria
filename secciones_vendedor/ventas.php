@@ -11,12 +11,14 @@ require_once __DIR__ . '/../services/CarritoService.php';
 if (!isset($_SESSION['carrito'])) {
     $_SESSION['carrito'] = [];
 }
+if (!empty($_POST['buscarcliente'])) {
+    $_SESSION['cliente'] = trim($_POST['buscarcliente']);
+}
 
 /* =========================
    ACCIONES (SOLO CONTROLLER)
 ========================= */
 
-$mensaje = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
@@ -33,11 +35,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (isset($_POST['finalizar'])) {
+        
         $resultado = VentasController::finalizar($conexion, $_SESSION);
         if ($resultado['ok']){
-            $mensaje = "Venta finalizada con ID: " . $resultado['id_venta'];
+            $_SESSION['mensaje'] = "Venta finalizada con ID: " . $resultado['id_venta'];//Guararmos el mensaje en sesion par no perderlo al recargar
         } else {
-           $mensaje = "❌ " . ($resultado['mensaje'] ?? var_export($resultado, true));
+           $_SESSION['mensaje'] = "❌ " . ($resultado['mensaje'] ?? var_export($resultado, true));
         }
     }
 }
@@ -156,6 +159,7 @@ Cantidad:
 <br>
 
 <form method="POST" onsubmit="return confirm('¿Finalizar venta?')">
+    <input type="hidden" name="finalizar" value="1">
     <button type="submit" name="finalizar">💰 Finalizar Venta</button>
 </form>
 
