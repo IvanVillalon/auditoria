@@ -11,6 +11,7 @@ if (!isset($_SESSION['usuario']) || $_SESSION['rol'] != 'vendedor') {
     exit();
 }
 
+
 $tiempo_inactivo = 1800;
 
 if (isset($_SESSION['ultima_actividad'])) {
@@ -54,15 +55,7 @@ if ($seccion === 'actualizar_productos') {
     require_once 'controllers/ProductoController.php';
     $productos = ProductoController::obtenerProductos($conexion);
 }
-if (isset($_POST['finalizar'])){
-    $resultado = VentasController::finalizar($conexion, $_SESSION);
-    if ($resultado['ok']){
-        $_SESSION['mensaje']= ['tipo'=>'ok', 'texto'=> "Venta finalizada con ID: " . $resultado['id_venta']];//Guararmos el mensaje en sesion par no perderlo al recargar
-    }else
-    {
-        $_SESSION['mensaje'] = ['tipo'=>'error', 'texto'=> "❌ " . ($resultado['mensaje'] ?? var_export($resultado, true))];
-    }
-}
+
 ?>
 
 <!DOCTYPE html>
@@ -74,9 +67,9 @@ if (isset($_POST['finalizar'])){
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="/auditoria/public/css_vendedor/css_notas_credito.css?v=<?= time() ?>">
 </head>
 <body>
-
 <?php include 'vendedor/includes/menu_vendedor.php'; ?>
 
 <div class="container mt-4">

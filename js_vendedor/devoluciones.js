@@ -19,7 +19,7 @@ function devolucionparcial(){
 
 function procesarDevolucion(tipoForzado = null) {
 
-    let productos = document.querySelectorAll("#tabla_detalle tbody tr[data-id]");
+    let productos = document.querySelectorAll("#tabla_detalles tbody tr[data-id]");
     let comentarioInput = document.getElementById("comentario_nota");
     let comentario = comentarioInput ? comentarioInput.value : "";
 
@@ -183,20 +183,23 @@ function procesarDevolucion(tipoForzado = null) {
 }
 function mostrarTablasNotaCredito() {
 
-    const tablaDetalle = document.getElementById("tabla_detalle");
+    const tablaDetalle = document.getElementById("tabla_detalles");
     const tablaAcciones = document.getElementById("tabla_acciones_nota_credito");
-
+    const contenedor = document.getElementById("container-detalles");
     if (tablaDetalle) {
         tablaDetalle.style.display = "table";
     }
 
     if (tablaAcciones) {
-        tablaAcciones.style.display = "table";
+        tablaAcciones.style.setProperty('display', 'flex', 'important');
+    }
+    if (contenedor){
+        contenedor.style.display = "flex";
     }
 }
 function resetearFilasDetalle() {
 
-    const filas = document.querySelectorAll("#tabla_detalle tbody tr");
+    const filas = document.querySelectorAll("#tabla_detalles tbody tr");
 
     filas.forEach(fila => {
 
@@ -218,7 +221,7 @@ function resetearFilasDetalle() {
 function mostrarSoloFactura(numero) {
 
     const filas = document.querySelectorAll(
-        `#tabla_detalle tbody tr[data-factura="${numero}"]`
+        `#tabla_detalles tbody tr[data-factura="${numero}"]`
     );
 
     console.log("Filas encontradas:", filas.length);

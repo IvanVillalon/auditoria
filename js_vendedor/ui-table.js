@@ -20,7 +20,7 @@ function resetearFilasDetalle() {
 function mostrarSoloFactura(numero) {
 
     let filas = document.querySelectorAll(
-        `#tabla_detalle tbody tr[data-factura="${numero}"]`
+        `#tabla_detalles tbody tr[data-factura="${numero}"]`
     );
 
     console.log("Filas encontradas:", filas.length);

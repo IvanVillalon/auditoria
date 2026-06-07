@@ -2,7 +2,6 @@
 
 require_once __DIR__ . '/../core/db.php';
 require_once __DIR__ . '/../core/auth.php';
-
 require_once __DIR__ . '/../controllers/VentasController.php';
 require_once __DIR__ . '/../repositories/ClienteRepository.php';
 require_once __DIR__ . '/../repositories/ProductoRepository.php';
@@ -35,13 +34,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (isset($_POST['finalizar'])) {
-        
+        error_log("FINALIZAR LLAMADO - " . date('H:i:s'));
         $resultado = VentasController::finalizar($conexion, $_SESSION);
         if ($resultado['ok']){
             $_SESSION['mensaje'] = "Venta finalizada con ID: " . $resultado['id_venta'];//Guararmos el mensaje en sesion par no perderlo al recargar
         } else {
            $_SESSION['mensaje'] = "❌ " . ($resultado['mensaje'] ?? var_export($resultado, true));
         }
+        header("Location: vendedor.php?secciones_vendedor=ventas");
+        exit();
     }
 }
 
@@ -160,7 +161,7 @@ Cantidad:
 
 <form method="POST" onsubmit="return confirm('¿Finalizar venta?')">
     <input type="hidden" name="finalizar" value="1">
-    <button type="submit" name="finalizar">💰 Finalizar Venta</button>
+    <button type="submit">💰 Finalizar Venta</button>
 </form>
 
 <?php } else { ?>

@@ -1,7 +1,13 @@
 <?php
 
 class NotaCreditoRepository {
-    
+    public static function getTotalPaginas($conexion, $sucursal){
+        $query = $conexion->prepare("SELECT COUNT(*) total FROM nota_credito nc INNER JOIN ventas v ON nc.id_venta = v.id WHERE v.id_sucursal = ?");
+        $query->bind_param("i", $sucursal);
+        $query->execute();
+        $total = $query->get_result()->fetch_assoc()['total'];
+        return ceil($total / 10);
+    }
     public static function getNotasCredito($conexion, $sucursal){
         $stmt = $conexion->prepare("
         SELECT

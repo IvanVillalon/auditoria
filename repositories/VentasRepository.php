@@ -9,7 +9,7 @@ class VentasRepository {
     $total,
     $id_vendedor
 ) {
-
+     error_log("crearVenta LLAMADO - " . date('H:i:s'));
     $stmt = $conexion->prepare("
         INSERT INTO ventas
         (

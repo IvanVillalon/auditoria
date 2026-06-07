@@ -86,6 +86,8 @@ class VentaService {
             }
 
             $conexion->commit();
+            $conexion->begin_transaction();
+error_log("finalizarVenta LLAMADO - " . date('H:i:s') . " carrito: " . count($carrito));
             return true;
 
         } catch (Exception $e) {
