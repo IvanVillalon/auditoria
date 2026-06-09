@@ -181,6 +181,7 @@ function toggleRequired() {
     }
 }
 document.addEventListener("change", function(e) {
+    //ignora el select de tipo nota
 
     if (e.target.matches(".check_producto")) {
 

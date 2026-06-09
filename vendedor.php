@@ -86,7 +86,7 @@ if(file_exists($archivo)){
 ?>
 
 </div>
-
+<script src="js_vendedor/devoluciones.js?v=<?= time() ?>"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
 <script src="js_vendedor/vendedor.js?v=<?= time() ?>"></script>
@@ -95,7 +95,7 @@ if(file_exists($archivo)){
     
 <script src="js_vendedor/actualizar_producto.js"></script>
 <script src="js_vendedor/productos.js"></script>
-<script src="js_vendedor/devoluciones.js"></script>
+
 <script src="js_vendedor/inventario.js"></script>
 <script src="js_vendedor/registro_producto.js"></script>
 </body>

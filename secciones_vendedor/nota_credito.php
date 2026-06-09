@@ -129,6 +129,7 @@ $total_paginas = ceil($total_filas / $limite);
                 <th>Disponible</th>
                 <th>Precio</th>
                 <th>Seleccionar</th>
+                <th>Tipo Nota</th>
                 <th>Estado</th>
                 <th>Cantidad</th>
             </tr>
@@ -156,12 +157,21 @@ $total_paginas = ceil($total_filas / $limite);
                         <input type="checkbox" class="check_producto" <?php echo $disabled; ?>>
                     </td>
                     <td>
-                        <select class="estado_producto" disabled>
+                        <select  class='tipo_nota_credito form-select' onchange="cambiarTipoNota(this)" required>
+            <option value='devolucion'>Devolución de producto</option>
+            <option value='ajuste_precio'>Ajuste de precio por producto</option>
+        </select>
+                        <!--<select class="estado_producto" disabled>
                             <option value="">Seleccione estado</option>
                             <option value="bueno">Bueno</option>
                             <option value="danado">Dañado</option>
-                        </select>
+                        </select>-->
                     </td>
+                    <td>  <select class="estado_producto">
+        <option value="">Seleccione estado</option>
+        <option value="bueno">Bueno</option>
+        <option value="danado">Dañado</option>   
+    </select></td>
                     <td>
                         <input type="number" 
                             class="cantidad_devolver" 
@@ -177,6 +187,23 @@ $total_paginas = ceil($total_filas / $limite);
    
 </div>
  <div id='tabla_acciones_nota_credito' class=' gap-2 flex-wrap' style="display: none;">
+  
+    <div class="ajuste_valor" style="display: none;">
+    <label><strong>Ajuste de Valores</strong></label>
+    <table class="table table-striped table-hover text-center shadow-sm mt-2">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Color</th>
+                <th>Precio Actual</th>
+                <th>Nuevo Precio</th>
+            </tr>
+        </thead>
+        <tbody id="cuerpo_ajuste_valores">
+            <!-- Se llena dinámicamente desde JS -->
+        </tbody>
+    </table>
+</div>
 
     <div class='w-100' style='align-items:center;'>
         <label>Comentario para nota de crédito:</label>

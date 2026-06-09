@@ -77,8 +77,10 @@ $resultadonotacredito = $stmt->get_result();
             SELECT 
                 dv.id_producto,
                 dv.color,
-                dv.cantidad
+                dv.cantidad,
+                v.rut_cliente
             FROM detalle_venta dv
+            INNER JOIN ventas v ON dv.id_venta = v.id
             WHERE dv.id_venta = ?
         ");
 
@@ -129,7 +131,7 @@ $resultadonotacredito = $stmt->get_result();
     public function sumarStock($conexion, $p, $session) {
 
         $stmt = $conexion->prepare("
-            UPDATE inventario
+            UPDATE stock_sucursal
             SET stock = stock + ?
             WHERE id_producto = ?
             AND id_sucursal = ?
@@ -166,6 +168,32 @@ $resultadonotacredito = $stmt->get_result();
         );
 
         $stmt->execute();
+    }
+    public function ajustarPrecio($conexion, $p ,$session){
+        $nuevo_precio = $p['nuevo_precio'] ?? $p['precio'];
+        $id_venta = $p['id_venta'];
+        $cantidad = $p['cantidad'];
+        $subtotal = $cantidad * $nuevo_precio;
+        $id_producto = $p['id_producto'];
+        $stmt = $conexion->prepare("
+            UPDATE detalle_venta
+            SET precio = ?, 
+                cantidad = ?,
+                subtotal = ?
+            WHERE id_venta = ?
+            AND id_producto = ?
+        ");
+        if (!$stmt){
+            error_log("Errror prepare:" . $conexion->error);
+            throw new Exception("Error preparadno la consulta");
+        }
+        $stmt->bind_param("dddii",$nuevo_precio,$cantidad,$subtotal,  $id_venta, $id_producto);
+        $stmt->execute();
+        error_log("Filas afectadas: " .$stmt->affected_rows);
+        if ($stmt->affected_rows === 0){
+            error_log("No se encontro detalle_venta con id_venta=$id_venta y id_producto=$id_producto");
+        }
+        $stmt->close();
     }
 
     public function sumarCreditoCliente($conexion, $rut_cliente, $total) {

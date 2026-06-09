@@ -13,10 +13,12 @@ if (!$id_nota_credito) {
 $stmt = $conexion->prepare("
 SELECT 
 nc.id_nota_credito,
+nc.id_venta,
 nc.fecha,
 nc.estado,
 nc.comentario,
 dnc.cantidad,
+dnc.id_nota_credito,
 dnc.precio,
 dnc.subtotal,
 dnc.color,
