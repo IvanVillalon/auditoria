@@ -90,35 +90,47 @@ $resultadonotacredito = $stmt->get_result();
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
-    public function crearNota($conexion, $id_venta, $tipo, $comentario, $id_operario) {
+    public function crearNota($conexion, $id_venta, $tipo, $estado, $comentario, $id_operario, $monto_ajuste = 0) {
+    
+    $stmt = $conexion->prepare("
+        INSERT INTO nota_credito (id_venta, fecha, estado, tipo, comentario, id_operario, monto_ajuste)
+        VALUES (?, NOW(), ?, ?, ?, ?, ?)
+    ");
 
-        $stmt = $conexion->prepare("
-            INSERT INTO nota_credito (id_venta, fecha, estado, comentario, id_operario)
-            VALUES (?, NOW(), ?, ?, ?)
-        ");
+    $stmt->bind_param("isssid", 
+        $id_venta, 
+        $estado, 
+        $tipo, 
+        $comentario, 
+        $id_operario,
+        $monto_ajuste  // 👈 agregado
+    );
 
-        $stmt->bind_param("issi", $id_venta, $tipo, $comentario, $id_operario);
-        $stmt->execute();
-
-        return $stmt->insert_id;
-    }
+    $stmt->execute();
+    return $stmt->insert_id;
+}
 
     public function insertarDetalleNota($conexion, $id_nota, $p, $id_operario) {
+        $tipoNota = $p['tipo_nota'] ?? 'devolucion';
+        $nuevoPrecio = $p['nuevo_precio'] ?? $p['precio'];
 
-        $subtotal = $p['precio'] * $p['cantidad'];
+        $subtotal = ($tipoNota === 'ajuste_precio')
+            ? $nuevoPrecio * $p['cantidad']
+            : $p['precio'] * $p['cantidad'];
 
         $stmt = $conexion->prepare("
             INSERT INTO detalle_nota_credito
-            (id_nota_credito, id_producto, cantidad, precio, subtotal, color, estado_producto, id_operario)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            (id_nota_credito, id_producto, cantidad, precio, nuevo_precio,subtotal, color, estado_producto, id_operario)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
 
         $stmt->bind_param(
-            "iiiddssi",
+            "iiidddssi",
             $id_nota,
             $p['id_producto'],
             $p['cantidad'],
             $p['precio'],
+            $nuevoPrecio,
             $subtotal,
             $p['color'],
             $p['estado'],
@@ -172,26 +184,28 @@ $resultadonotacredito = $stmt->get_result();
     public function ajustarPrecio($conexion, $p ,$session){
         $nuevo_precio = $p['nuevo_precio'] ?? $p['precio'];
         $id_venta = $p['id_venta'];
+        $id_producto = $p['id_producto'];
+        $color = $p['color'];
         $cantidad = $p['cantidad'];
         $subtotal = $cantidad * $nuevo_precio;
-        $id_producto = $p['id_producto'];
+
         $stmt = $conexion->prepare("
             UPDATE detalle_venta
-            SET precio = ?, 
-                cantidad = ?,
+            SET precio = ?,
                 subtotal = ?
             WHERE id_venta = ?
+            AND color = ?
             AND id_producto = ?
         ");
         if (!$stmt){
             error_log("Errror prepare:" . $conexion->error);
             throw new Exception("Error preparadno la consulta");
         }
-        $stmt->bind_param("dddii",$nuevo_precio,$cantidad,$subtotal,  $id_venta, $id_producto);
+        $stmt->bind_param("ddisi",$nuevo_precio,$subtotal, $id_venta, $color, $id_producto);
         $stmt->execute();
         error_log("Filas afectadas: " .$stmt->affected_rows);
         if ($stmt->affected_rows === 0){
-            error_log("No se encontro detalle_venta con id_venta=$id_venta y id_producto=$id_producto");
+            error_log("No se encontro detalle_venta con id_venta=$id_venta y id_producto=$id_producto, color= $color" );
         }
         $stmt->close();
     }

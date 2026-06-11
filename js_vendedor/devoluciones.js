@@ -19,7 +19,7 @@ function devolucionparcial(){
 window.llenarTablaAjustesValores = function() {
     const tbody = document.getElementById("cuerpo_ajuste_valores");
     tbody.innerHTML = "";
-
+  
     const filas = document.querySelectorAll("#tabla_detalles tbody tr[data-id]");
 
     filas.forEach(fila => {
@@ -29,6 +29,7 @@ window.llenarTablaAjustesValores = function() {
         const color       = fila.cells[1].textContent.trim();
         const precio      = fila.cells[5].textContent.trim();
         const idProducto  = fila.dataset.id;
+        const cantidad = fila.cells[2].textContent.trim();
 
         const precioNumero = precio
             .replace("$", "")
@@ -37,7 +38,13 @@ window.llenarTablaAjustesValores = function() {
             .trim();
 
         const tr = document.createElement("tr");
+        tr.dataset.id = idProducto;
+        tr.dataset.color = color;
+        tr.dataset.cantidad = cantidad;
         tr.innerHTML = `
+            <td>
+                <input type="checkbox" class="check_producto" checked>
+            </td>
             <td>${producto}</td>
             <td>${color}</td>
             <td>${precio}</td>
@@ -185,7 +192,10 @@ function procesarDevolucion(tipoForzado = null) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            tipo:         tipoForzado,
+            tipo: "devolucion",
+            estado: tipoForzado === "total"
+                    ? "completa"
+                    : "parcial",
             productos:    datos,
             id_venta:     idVentaSeleccionada,
             comentario:   comentario
@@ -265,5 +275,129 @@ function mostrarSoloFactura(numero) {
     filas.forEach(fila => {
 
         fila.style.display = "table-row";
+    });
+}
+function procesarAjuste(){
+    let productos       = document.querySelectorAll("#cuerpo_ajuste_valores tr[data-id]");
+    let comentarioInput = document.getElementById("comentario_nota");
+    let comentario      = comentarioInput ? comentarioInput.value : "";
+    let botones         = document.querySelectorAll("button");
+    
+
+    botones.forEach(btn => btn.disabled = true);
+
+    if (comentario.trim() === ""){
+        Swal.fire("Error", "El comentario es obligatorio", "warning");
+        botones.forEach(btn => btn.disabled = false);
+        return;
+    }
+
+    let datos = [];
+    let error = false;
+
+    Swal.fire({
+        title: "Procesando...",
+        text: "Registrando ajuste de precio",
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+    });
+
+    productos.forEach(fila => {
+        if (!fila.offsetParent) return;
+
+        let checkbox = fila.querySelector(".check_producto");
+        if (!checkbox || !checkbox.checked) return;
+
+        // ✅ Declarar variables primero
+        let id_producto = fila.dataset.id;
+        let color       = fila.dataset.color;
+
+        let cantidad = parseInt(fila.dataset.cantidad) || 0;
+        
+        let precio = parseFloat(
+            fila.cells[3].textContent
+                .replace("$", "")
+                .replace(/\./g, "")
+                .replace(",", ".")
+                .trim()
+        );
+
+        let inputPrecio = fila.querySelector(".nuevo_precio");
+        let nuevoPrecio = inputPrecio ? parseFloat(inputPrecio.value) : null;
+
+        if (!nuevoPrecio || nuevoPrecio <= 0){
+            Swal.fire("Error", "Debe ingresar un precio válido", "warning");
+            error = true;
+            return;
+        }
+
+        datos.push({
+            id_producto,
+            id_venta:     idVentaSeleccionada,
+            color,
+            cantidad,
+            precio,
+            nuevo_precio: nuevoPrecio,
+            tipo_nota:    "ajuste_precio"
+        });
+    });
+
+    if (error){
+        botones.forEach(btn => btn.disabled = false);
+        return;
+    }
+
+    if (datos.length === 0){
+        Swal.fire("Error", "Seleccione al menos un producto", "warning");
+        botones.forEach(btn => btn.disabled = false);
+        return;
+    }
+
+    if (!idVentaSeleccionada){
+        Swal.fire("Error", "No se ha seleccionado una venta", "error");
+        botones.forEach(btn => btn.disabled = false);
+        return;
+    }
+    console.log("DATOS A ENVIAR:", JSON.stringify({
+        tipo: "ajuste_precio",
+        productos: datos,
+        id_venta: idVentaSeleccionada,
+        comentario: comentario
+    }))
+    fetch("api/procesar_nota_credito.php",{
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            tipo:       "ajuste_precio",
+            estado: "completa",
+            productos:  datos,
+            id_venta:   idVentaSeleccionada,
+            comentario: comentario
+        })
+    })
+    .then(async (r) => {
+        const text = await r.text();
+        console.log("RESPUESTA CRUDA:", text);
+        const jsonMatch = text.match(/\{.*\}/s);
+        if (!jsonMatch) throw new Error("Respuesta inválida del servidor");
+        return JSON.parse(jsonMatch[0]);
+    })
+    .then(res => {
+        if (res.status !== "ok"){
+            Swal.fire({ icon: "error", title: "Error", text: res.mensaje || "Error desconocido" });
+            return;
+        }
+        Swal.fire({ icon: "success", title: "✔ Ajuste registrado", text: res.mensaje })
+            .then(() => {
+                if (res.pdf) window.open(res.pdf, "_blank");
+                location.reload();
+            });
+    })
+    .catch(err => {
+        console.error("ERROR:", err);
+        Swal.fire({ icon: "error", title: "Error de servidor", text: err.message });
+    })
+    .finally(() => {
+        botones.forEach(b => b.disabled = false);
     });
 }

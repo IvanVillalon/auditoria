@@ -181,11 +181,12 @@ function toggleRequired() {
     }
 }
 document.addEventListener("change", function(e) {
-    //ignora el select de tipo nota
-
     if (e.target.matches(".check_producto")) {
 
         let fila = e.target.closest("tr");
+
+        // ✅ Verificar si la fila pertenece a la tabla de ajuste
+        if (fila.closest("#cuerpo_ajuste_valores")) return;
 
         let select = fila.querySelector(".estado_producto");
 
@@ -195,11 +196,8 @@ document.addEventListener("change", function(e) {
         }
 
         console.log("✔ Checkbox clickeado");
-
         select.disabled = !e.target.checked;
-
     }
-
 });
 
 

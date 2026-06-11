@@ -202,14 +202,17 @@ $total_paginas = ceil($total_filas / $limite);
         <tbody id="cuerpo_ajuste_valores">
             <!-- Se llena dinámicamente desde JS -->
         </tbody>
-    </table>
+    </table><br>
+    <button class="btn btn-info" onclick="procesarAjuste()">
+        Registrar Nota
+    </button>
 </div>
+
 
     <div class='w-100' style='align-items:center;'>
         <label>Comentario para nota de crédito:</label>
         <textarea id='comentario_nota' class='form-control' rows='3'></textarea>
     </div>
-
     <button class='btn btn-primary' onclick="procesarDevolucion('total')">
         Devolución completa
     </button>
